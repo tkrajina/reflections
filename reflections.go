@@ -19,6 +19,40 @@ import (
 	"reflect"
 )
 
+type Field string
+
+func (k Field) Value(obj interface{}) (interface{}, error) {
+	return GetField(obj, string(k))
+}
+
+func (k Field) Set(obj interface{}, value interface{}) error {
+	return SetField(obj, string(k), value)
+}
+
+func (k Field) Kind(obj interface{}) (reflect.Kind, error) {
+	return GetFieldKind(obj, string(k))
+}
+
+func (k Field) Type(obj interface{}) (reflect.Type, error) {
+	return GetFieldType(obj, string(k))
+}
+
+func (k Field) IsPtr(obj interface{}) (bool, error) {
+	kind, err := k.Kind(obj)
+	if err != nil {
+		return false, err
+	}
+	return kind == reflect.Ptr, nil
+}
+
+func (k Field) Tag(obj interface{}, tag string) (string, error) {
+	tags, err := TagsDeep(obj, tag)
+	if err != nil {
+		return "", err
+	}
+	return tags[string(k)], nil
+}
+
 // GetField returns the value of the provided obj field. obj can whether
 // be a structure or pointer to structure.
 func GetField(obj interface{}, name string) (interface{}, error) {
